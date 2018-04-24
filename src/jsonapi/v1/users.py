@@ -321,7 +321,7 @@ class Filters(object):
             assert isinstance(repository_filter, api.filters.RepositoryFilter)
             result.append(repository_filter)
 
-        with api.transaction.Transaction(critic, result) as transaction:
+        with api.transaction.Transaction(critic) as transaction:
             transaction \
                 .modifyUser(subject) \
                 .createFilter(
