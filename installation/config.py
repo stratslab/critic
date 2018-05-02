@@ -52,6 +52,9 @@ is_development = False
 is_testing = False
 coverage_dir = None
 
+branding_company = "Opera"
+branding_name = "Critic"
+
 class Provider(object):
     def __init__(self, name):
         self.name = name
@@ -251,6 +254,13 @@ def add_arguments(mode, parser):
     parser.add_argument(
         "--coverage-dir", help=argparse.SUPPRESS)
 
+    parser.add_argument(
+        "--branding-name", help=argparse.SUPPRESS)
+
+    parser.add_argument(
+        "--branding-company", help=argparse.SUPPRESS)
+
+
 default_encodings = ["utf-8", "latin-1"]
 
 def prepare(mode, arguments, data):
@@ -262,6 +272,7 @@ def prepare(mode, arguments, data):
     global minimum_password_hash_time, minimum_rounds, auth_database
     global enable_access_tokens
     global is_development, is_testing, coverage_dir
+    global branding_name, branding_company
 
     global ldap_url, ldap_search_base, ldap_create_user, ldap_username_attribute
     global ldap_fullname_attribute, ldap_email_attribute, ldap_cache_max_age
@@ -329,6 +340,11 @@ the Web front-end.  This can be handled in two different ways:
         is_development = arguments.is_development
         is_testing = arguments.is_testing
         coverage_dir = arguments.coverage_dir
+
+        if arguments.branding_name:
+            branding_name = arguments.branding_name
+        if arguments.branding_company:
+            branding_company = arguments.branding_company
     else:
         import configuration
 
@@ -389,6 +405,12 @@ the Web front-end.  This can be handled in two different ways:
         except AttributeError: pass
 
         try: archive_review_branches = configuration.base.ARCHIVE_REVIEW_BRANCHES
+        except AttributeError: pass
+
+        try: branding_name = configuration.branding.PRODUCT_NAME
+        except AttributeError: pass
+
+        try: branding_company = configuration.branding.PRODUCT_COMPANY
         except AttributeError: pass
 
         try:
@@ -631,6 +653,9 @@ web server to redirect all HTTP accesses to HTTPS.
     data["installation.config.is_development"] = is_development
     data["installation.config.is_testing"] = is_testing
     data["installation.config.coverage_dir"] = coverage_dir
+
+    data["installation.config.branding_name"] = branding_name
+    data["installation.config.branding_company"] = branding_company
 
     if mode == "upgrade":
         data["installation.config.highlight.max_workers"] = \
