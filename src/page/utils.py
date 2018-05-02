@@ -64,8 +64,8 @@ def generateHeader(target, db, user, generate_right=None, current_page=None, ext
     if configuration.debug.IS_DEVELOPMENT:
         opera_class += " development"
 
-    b.b(opera_class, onclick="location.href='/';").text("Opera")
-    b.b("critic", onclick="location.href='/';").text("Critic")
+    b.b(opera_class, onclick="location.href='/';").text(configuration.branding.PRODUCT_COMPANY)
+    b.b("critic", onclick="location.href='/';").text(configuration.branding.PRODUCT_NAME)
 
     links = []
 
