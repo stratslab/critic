@@ -428,7 +428,7 @@ def renderShowReview(req, db, user):
             renderPeople(target, review.reviewers)
         else:
             target.i().text("No reviewers.")
-
+	return
         cursor.execute("""SELECT reviewfilters.id, reviewfilters.uid, reviewfilters.path
                             FROM reviewfilters
                             JOIN users ON (reviewfilters.uid=users.id)
@@ -660,8 +660,8 @@ def renderShowReview(req, db, user):
             for label, onclick in buttons:
                 container.button(onclick=onclick).text(label)
 
-    row("Branch", renderBranchName, "The branch containing the commits to review.", right=False)
-    row("Owner%s" % ("s" if len(review.owners) > 1 else ""), renderOwners, "The users who created and/or owns the review.", right=renderEditOwners)
+#    row("Branch", renderBranchName, "The branch containing the commits to review.", right=False)
+#    row("Owner%s" % ("s" if len(review.owners) > 1 else ""), renderOwners, "The users who created and/or owns the review.", right=renderEditOwners)
     if review.description:
         row("Description", review.description, "A longer description of the changes to be reviewed.", linkify=linkToCommit, cellId="description", right=renderEditDescription)
     row("Reviewers", renderReviewers, "Users responsible for reviewing the changes in this review.", right=False)
@@ -689,8 +689,8 @@ def renderShowReview(req, db, user):
                    'progress': str(review_state) }
 
     if review.state == "closed":
-        progress_h1.img(src=htmlutils.getStaticResourceURI("seal-of-approval-left.png"),
-                        style="position: absolute; margin-left: -80px; margin-top: -100px")
+#        progress_h1.img(src=htmlutils.getStaticResourceURI("seal-of-approval-left.png"),
+#                        style="position: absolute; margin-left: -80px; margin-top: -100px")
         progress_h1.text("Finished!")
 
         for branch in review.repository.getSignificantBranches(db):
@@ -702,8 +702,8 @@ def renderShowReview(req, db, user):
     elif review.state == "dropped":
         progress_h1.text("Dropped...")
     elif review.state == "open" and review_state.accepted:
-        progress_h1.img(src=htmlutils.getStaticResourceURI("seal-of-approval-left.png"),
-                        style="position: absolute; margin-left: -80px; margin-top: -100px")
+#        progress_h1.img(src=htmlutils.getStaticResourceURI("seal-of-approval-left.png"),
+#                        style="position: absolute; margin-left: -80px; margin-top: -100px")
         progress_h1.text("Accepted!")
         progress_h1.div().span("remark").text("Hurry up and close it before anyone has a change of heart.")
     else:
@@ -876,11 +876,11 @@ def renderShowReview(req, db, user):
 
             if user == current_rebases[0][3]:
                 bottom_right = renderCancelRebase
-        else:
-            def renderPrepareRebase(db, target):
-                target.button("preparerebase").text("Prepare Rebase")
-
-            bottom_right = renderPrepareRebase
+#        else:
+#            def renderPrepareRebase(db, target):
+#                target.button("preparerebase").text("Prepare Rebase")
+#
+#            bottom_right = renderPrepareRebase
 
         if finished_rebases:
             cursor.execute("""SELECT commit
