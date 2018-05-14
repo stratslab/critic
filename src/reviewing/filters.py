@@ -156,6 +156,7 @@ class Filters:
         self.data = {}           # dict(file_id -> data)
         self.active_filters = {} # dict(user_id -> set(filter_id))
         self.matched_files = {}  # dict(filter_id -> set(file_id))
+        self.best_match = {}     # dict(file_id -> Path)
 
         # Note: The same per-file 'data' objects are referenced by all of
         # 'self.files', 'self.tree' and 'self.data'.
@@ -277,6 +278,12 @@ class Filters:
                     return
 
         self.matched_files[filter_id] = file_ids
+        for file_id in file_ids:
+            if file_id in self.best_match:
+                if Path.cmp(self.best_match[file_id], path) < 0:
+                    self.best_match[file_id] = path
+            else:
+                self.best_match[file_id] = path
 
         if filter_type == "ignored":
             for data in files:
@@ -286,7 +293,7 @@ class Filters:
             if files:
                 self.active_filters.setdefault(user_id, set()).add(filter_id)
                 for data in files:
-                    data[user_id] = (filter_type, delegate)
+                    data[user_id] = (filter_type, delegate, path)
 
     def addFilters(self, filters):
         def compareFilters(filterA, filterB):
@@ -380,11 +387,14 @@ class Filters:
     def listUsers(self, file_id):
         return self.data.get(file_id, {})
 
+    def bestMatch(self, file_id):
+        return self.best_match.get(file_id)
+
     def getRelevantFiles(self):
         relevant = {}
 
         for file_id, data in self.data.items():
-            for user_id, (filter_type, _) in data.items():
+            for user_id, (filter_type, _, _) in data.items():
                 if filter_type in ('reviewer', 'watcher'):
                     relevant.setdefault(user_id, set()).add(file_id)
 

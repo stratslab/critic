@@ -40,7 +40,7 @@ def renderShowFilters(req, db, user):
     reviewers = []
     watchers = []
 
-    for user_id, (filter_type, _delegate) in filters.listUsers(file_id).items():
+    for user_id, (filter_type, _delegate, _) in filters.listUsers(file_id).items():
         if filter_type == 'reviewer': reviewers.append(user_id)
         else: watchers.append(user_id)
 
