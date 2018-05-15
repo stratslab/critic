@@ -40,7 +40,7 @@ def getFileIdsFromChangesets(changesets):
     return file_ids
 
 def getReviewersAndWatchers(db, repository, commits=None, changesets=None, reviewfilters=None,
-                            applyfilters=True, applyparentfilters=False):
+                            applyfilters=True, applyparentfilters=False, reviewerbestmatch=False):
     """getReviewersAndWatchers(db, commits=None, changesets=None) -> tuple
 
 Returns a tuple containing two dictionaries, each mapping file IDs to
@@ -77,10 +77,13 @@ is used as a key in the dictionary instead of a real user ID."""
         for (file_id,) in cursor:
             reviewers_found = False
 
-            for user_id, (filter_type, delegate) in filters.listUsers(file_id).items():
+            for user_id, (filter_type, delegate, path) in filters.listUsers(file_id).items():
                 if filter_type == 'reviewer':
                     if user_id not in author_user_ids:
-                        reviewer_user_ids = [user_id]
+                        if not reviewerbestmatch or filters.bestMatch(file_id) == path:
+                            reviewer_user_ids = [user_id]
+                        else:
+                            reviewer_user_ids = []
                     elif delegate:
                         reviewer_user_ids = []
                         for delegate_user_name in delegate.split(","):
@@ -180,7 +183,7 @@ def assignChanges(db, user, review, commits=None, changesets=None, update=False)
     applyparentfilters = review.applyparentfilters
 
     reviewers, watchers = getReviewersAndWatchers(db, review.repository, changesets=changesets, reviewfilters=review.getReviewFilters(db),
-                                                  applyfilters=applyfilters, applyparentfilters=applyparentfilters)
+                                                  applyfilters=applyfilters, applyparentfilters=applyparentfilters, reviewerbestmatch=True)
 
     cursor.execute("SELECT uid FROM reviewusers WHERE review=%s", (review.id,))
 
