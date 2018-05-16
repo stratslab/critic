@@ -191,7 +191,7 @@ class BranchTracker(background.utils.BackgroundProcess):
         super(BranchTracker, self).__init__(service=configuration.services.BRANCHTRACKER)
 
     def update(self, trackedbranch_id, repository_id, local_name, remote, remote_name, forced):
-        doTrackedBranchUpdate(
+        return doTrackedBranchUpdate(
             self.db, self._logger,
             trackedbranch_id, repository_id, local_name,remote, remote_name, forced)
 
