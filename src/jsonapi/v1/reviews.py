@@ -17,9 +17,9 @@
 import logging
 
 import api
-from background import branchtracker
 import dbutils
 import jsonapi
+from operation import trackedbranch
 
 _logger = logging.getLogger(__name__)
 
@@ -180,15 +180,21 @@ class Reviews(object):
 
     @staticmethod
     def _updateTracking(parameters, review):
-        db = dbutils.Database.forUser(parameters.critic)
+        # get database
+        db = dbutils.Database.forUser(critic=parameters.critic)
+
+        # get user
+        user = parameters.critic.effective_user
+        db_user = dbutils.User.fromId(db, user.id)
+
         # get tracked branch from review
         db_review = dbutils.Review.fromId(db, review.id)
         db_tracked_branch = db_review.getTrackedBranch(db)
-        
-        # call branch updater
-        branchtracker.doTrackedBranchUpdate(
-            db, _logger, db_tracked_branch.id, db_review.repository.id,
-            db_review.branch.name, db_tracked_branch.remote, db_tracked_branch.name, True)
+
+        # call the operation
+        operation_data = {"branch_id": db_tracked_branch.id}
+        operation = trackedbranch.TriggerTrackedBranchUpdate()
+        operation.api_call(db, db_user, operation_data)
 
     @staticmethod
     def deduce(parameters):
