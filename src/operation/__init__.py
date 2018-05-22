@@ -149,6 +149,9 @@ class Operation(object):
                                       "A message has been sent to the system administrator(s) " +
                                       "with details about the problem.")
 
+    def api_call(self, db, user, data_object):
+        return self.process(db, user, **data_object)
+
     def process(self, *args, **kwargs):
         raise OperationError("not implemented!?!")
 
