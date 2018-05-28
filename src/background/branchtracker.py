@@ -173,14 +173,34 @@ Output from Critic's git hook
             return True
         except:
             exception = traceback.format_exc()
+            show_backtrace = True
 
             if local_name == "*":
                 error = "  update of tags from %s failed" % remote
             else:
                 error = "  update of branch %s from %s in %s failed" % (local_name, remote_name, remote)
+                output = getattr(sys.exc_info()[1], 'output', '')
+                if output.startswith("fatal: Couldn't find remote ref refs/heads/%s\n" % remote_name):
+                    cursor = self.db.cursor()
+                    error += "\n    Seems like remote branch '%s' doesn't exist!" % remote_name
+                    admin_responsible = dbutils.User.withRole(self.db, 'administrator')[0]
+                    cursor.execute("""SELECT r.id, r.summary
+                                        FROM reviews r INNER JOIN branches b ON r.branch = b.id
+                                       WHERE r.state = 'open' AND b.name = %s AND b.repository = %d""",
+                                   (local_name, repository_id))
+                    rows = cursor.fetchall()
+                    for rid, summary in rows:
+                        review = dbutils.Review.fromId(self.db, rid)
+                        error += "\n    * dropping review #{}: {} (by {})".format(
+                            rid, summary, admin_responsible)
+                        review.drop(self.db, admin_responsible)
+                        review.disableTracking(self.db)
+                        self.db.commit()
+                    show_backtrace = False
 
-            for line in exception.splitlines():
-                error += "\n    " + line
+            if show_backtrace:
+                for line in exception.splitlines():
+                    error += "\n    " + line
 
             self.error(error)
 
