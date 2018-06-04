@@ -224,7 +224,7 @@ def fetchMany(critic, review_ids):
 
     return api.impl.review.fetchMany(critic, review_ids)
 
-def fetchAll(critic, repository=None, state=None):
+def fetchAll(critic, repository=None, state=None, branch_name=None):
     """Fetch all Review objects in repository with the given state"""
 
     import api.impl
@@ -238,4 +238,4 @@ def fetchAll(critic, repository=None, state=None):
             state = set(state)
         assert not (state - Review.STATE_VALUES)
 
-    return api.impl.review.fetchAll(critic, repository, state)
+    return api.impl.review.fetchAll(critic, repository, state, branch_name)
