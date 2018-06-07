@@ -193,7 +193,7 @@ class Reviews(object):
 
         # call the operation
         operation_data = {"branch_id": db_tracked_branch.id}
-        operation = trackedbranch.TriggerTrackedBranchUpdate()
+        operation = trackedbranch.EnableTrackedBranch()
         operation.api_call(db, db_user, operation_data)
 
     @staticmethod
