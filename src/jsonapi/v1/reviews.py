@@ -144,8 +144,9 @@ class Reviews(object):
                     % ", ".join(map(repr, sorted(invalid))))
         else:
             state = None
+        branch_name = parameters.getQueryParameter("branch_name")
         return api.review.fetchAll(
-            parameters.critic, repository=repository, state=state)
+            parameters.critic, repository=repository, state=state, branch_name=branch_name)
 
     @staticmethod
     def create(parameters, value, values, data):

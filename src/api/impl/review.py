@@ -317,7 +317,7 @@ def fetchMany(critic, review_ids):
 
     return [reviews_by_id[review_id] for review_id in review_ids]
 
-def fetchAll(critic, repository, state):
+def fetchAll(critic, repository, state, branch_name):
     cursor = critic.getDatabaseCursor()
     conditions = ["TRUE"]
     values = []
@@ -328,6 +328,9 @@ def fetchAll(critic, repository, state):
         conditions.append("reviews.state IN (%s)"
                           % ", ".join(["%s"] * len(state)))
         values.extend(state)
+    if branch_name is not None:
+        conditions.append("branches.name LIKE %s")
+        values.append(branch_name)
     cursor.execute("""SELECT reviews.id, branches.repository, branches.id,
                              state, summary, description
                         FROM reviews
