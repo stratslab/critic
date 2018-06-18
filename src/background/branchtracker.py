@@ -186,7 +186,7 @@ Output from Critic's git hook
                     admin_responsible = dbutils.User.withRole(self.db, 'administrator')[0]
                     cursor.execute("""SELECT r.id, r.summary
                                         FROM reviews r INNER JOIN branches b ON r.branch = b.id
-                                       WHERE r.state = 'open' AND b.name = %s AND b.repository = %d""",
+                                       WHERE r.state = 'open' AND b.name = %s AND b.repository = %s""",
                                    (local_name, repository_id))
                     rows = cursor.fetchall()
                     for rid, summary in rows:
