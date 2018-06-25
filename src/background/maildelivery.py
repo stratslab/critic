@@ -252,7 +252,7 @@ class MailDelivery(background.utils.PeerServer):
         message = email.mime.text.MIMEText(body, "plain", "utf-8")
         recipients = filter(lambda user: bool(user.email), recipients)
 
-        if not to_user.email:
+        if not to_user.email or not from_user.email:
             return True
 
         if message_id:
