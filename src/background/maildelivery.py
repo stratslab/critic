@@ -224,6 +224,8 @@ class MailDelivery(background.utils.PeerServer):
 
             self.__connection = None
 
+    MAX_ATTEMPTS = 3
+
     def __send(self, message_id, parent_message_id, headers, from_user, to_user, recipients, subject, body, **kwargs):
         def isascii(s):
             return all(ord(c) < 128 for c in s)
@@ -293,6 +295,9 @@ class MailDelivery(background.utils.PeerServer):
                     return False
 
                 attempts += 1
+                if attempts >= self.MAX_ATTEMPTS:
+                    raise
+
                 sleeptime = min(60, 2 ** attempts)
 
                 self.error("delivery failure: sleeping %d seconds" % sleeptime)
