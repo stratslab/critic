@@ -41,7 +41,10 @@ CREATE TABLE reviews
     applyparentfilters BOOLEAN NOT NULL,
 
     summary TEXT,
-    description TEXT );
+    description TEXT,
+
+    obsoleted_by INTEGER,
+    obsoletes INTEGER);
 CREATE INDEX reviews_branch ON reviews (branch);
 
 CREATE TABLE scheduledreviewbrancharchivals
