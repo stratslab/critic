@@ -660,6 +660,12 @@ def renderShowReview(req, db, user):
             for label, onclick in buttons:
                 container.button(onclick=onclick).text(label)
 
+    def renderObsoletes(target):
+        target.a(href="r/%d" % review.obsoletes).text("Previous review")
+
+    def renderObsoletedBy(target):
+        target.a(href="r/%d" % review.obsoleted_by).text("Next review")
+
 #    row("Branch", renderBranchName, "The branch containing the commits to review.", right=False)
 #    row("Owner%s" % ("s" if len(review.owners) > 1 else ""), renderOwners, "The users who created and/or owns the review.", right=renderEditOwners)
     if review.description:
@@ -667,6 +673,10 @@ def renderShowReview(req, db, user):
     row("Reviewers", renderReviewers, "Users responsible for reviewing the changes in this review.", right=False)
     row("Watchers", renderWatchers, "Additional users who receive e-mails about updates to this review.", right=False)
     row("Recipient List", renderRecipientList, "Users (among the reviewers and watchers) who will receive any e-mails about the review.", right=False)
+    if review.obsoletes:
+        row("Obsoletes", renderObsoletes, "Previous review for branch", right=False)
+    if review.obsoleted_by:
+        row("Obsoleted by", renderObsoletedBy, "Next review for branch", right=False)
 
     profiler.check("basic")
 

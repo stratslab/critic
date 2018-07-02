@@ -228,7 +228,7 @@ class ReviewTrackedBranch(object):
         self.disabled = disabled
 
 class Review(object):
-    def __init__(self, review_id, owners, review_type, branch, state, serial, summary, description, applyfilters, applyparentfilters):
+    def __init__(self, review_id, owners, review_type, branch, state, serial, summary, description, applyfilters, applyparentfilters, obsoleted_by, obsoletes):
         self.id = review_id
         self.owners = owners
         self.type = review_type
@@ -247,6 +247,8 @@ class Review(object):
         self.relevant_files = None
         self.draft_status = None
         self.performed_rebase = None
+        self.obsoleted_by = obsoleted_by
+        self.obsoletes = obsoletes
 
     @staticmethod
     def isAccepted(db, review_id):
@@ -555,10 +557,10 @@ class Review(object):
         db.cursor().execute("UPDATE reviews SET state='closed', serial=%s, closed_by=%s WHERE id=%s", (self.serial, user.id, self.id))
         self.scheduleBranchArchival(db)
 
-    def drop(self, db, user):
+    def drop(self, db, user, obsoleted_by=None):
         self.serial += 1
         self.state = "dropped"
-        db.cursor().execute("UPDATE reviews SET state='dropped', serial=%s, closed_by=%s WHERE id=%s", (self.serial, user.id, self.id))
+        db.cursor().execute("UPDATE reviews SET state='dropped', serial=%s, closed_by=%s, obsoleted_by=%s WHERE id=%s", (self.serial, user.id, obsoleted_by, self.id))
         self.scheduleBranchArchival(db)
 
     def reopen(self, db, user):
@@ -679,11 +681,11 @@ class Review(object):
         from dbutils import User
 
         cursor = db.cursor()
-        cursor.execute("SELECT type, branch, state, serial, summary, description, applyfilters, applyparentfilters FROM reviews WHERE id=%s", [review_id])
+        cursor.execute("SELECT type, branch, state, serial, summary, description, applyfilters, applyparentfilters, obsoleted_by, obsoletes FROM reviews WHERE id=%s", [review_id])
         row = cursor.fetchone()
         if not row: raise NoSuchReview(review_id)
 
-        type, branch_id, state, serial, summary, description, applyfilters, applyparentfilters = row
+        type, branch_id, state, serial, summary, description, applyfilters, applyparentfilters, obsoleted_by, obsoletes = row
 
         if profiler: profiler.check("Review.fromId: basic")
 
@@ -697,7 +699,7 @@ class Review(object):
 
         if profiler: profiler.check("Review.fromId: owners")
 
-        review = Review(review_id, owners, type, branch, state, serial, summary, description, applyfilters, applyparentfilters)
+        review = Review(review_id, owners, type, branch, state, serial, summary, description, applyfilters, applyparentfilters, obsoleted_by, obsoletes)
         branch.review = review
 
         # Reviewers: all users that have at least one review file assigned to them.

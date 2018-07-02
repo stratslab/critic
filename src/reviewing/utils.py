@@ -450,7 +450,7 @@ Please confirm that this is intended by loading:
 
     return True
 
-def createReview(db, user, repository, commits, branch_name, summary, description, from_branch_name=None, via_push=False, reviewfilters=None, applyfilters=True, applyparentfilters=False, recipientfilters=None):
+def createReview(db, user, repository, commits, branch_name, summary, description, from_branch_name=None, via_push=False, reviewfilters=None, applyfilters=True, applyparentfilters=False, recipientfilters=None, previous_review=None):
     cursor = db.cursor()
 
     if via_push:
@@ -540,14 +540,14 @@ using the command<p>
 
         cursor.execute("""INSERT INTO reviews (type, branch, origin, state,
                                                summary, description,
-                                               applyfilters, applyparentfilters)
+                                               applyfilters, applyparentfilters, obsoletes)
                                VALUES ('official', %s, %s, 'open',
                                        %s, %s,
-                                       %s, %s)
+                                       %s, %s, %s)
                             RETURNING id""",
                        (branch_id, from_branch_id,
                         summary, description,
-                        applyfilters, applyparentfilters))
+                        applyfilters, applyparentfilters, previous_review))
 
         review = dbutils.Review.fromId(db, cursor.fetchone()[0])
 

@@ -82,12 +82,13 @@ class SubmitReview(Operation):
                                    "description": Optional(str),
                                    "frombranch": Optional(str),
                                    "trackedbranch": Optional({ "remote": str,
-                                                               "name": str }) })
+                                                               "name": str }),
+                                   "previous_review": Optional(int)})
 
     def process(self, db, user, repository, branch, summary, commit_ids=None,
                 commit_sha1s=None, applyfilters=True, applyparentfilters=True,
                 reviewfilters=None, recipientfilters=None, description=None,
-                frombranch=None, trackedbranch=None):
+                frombranch=None, trackedbranch=None, previous_review=None):
         # Raises auth.AccessDenied if access should not be allowed.
         repository.checkAccess(db, "modify")
 
@@ -132,7 +133,12 @@ class SubmitReview(Operation):
                               reviewfilters=reviewfilters,
                               recipientfilters=recipientfilters,
                               applyfilters=applyfilters,
-                              applyparentfilters=applyparentfilters)
+                              applyparentfilters=applyparentfilters,
+                              previous_review=previous_review)
+
+        if previous_review:
+            obsoleted_review = dbutils.Review.fromId(db, previous_review)
+            obsoleted_review.drop(db, user, review.id)
 
         extensions_output = StringIO()
         kwargs = {}
