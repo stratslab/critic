@@ -291,6 +291,11 @@
     "default": false,
     "description": "Show the \"Ping Review\" button on the front-page of every review, instead of only those you own."
   },
+  "review.updateAnyBranch": {
+    "type": "boolean",
+    "default": true,
+    "description": "Allow any user to update tracking branch instead of owner only."
+  },
   "review.updateCheckInterval": {
     "type": "integer",
     "default": 300,

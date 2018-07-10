@@ -87,7 +87,8 @@ class DisableTrackedBranch(Operation):
     def process(self, db, user, branch_id):
         cursor = db.cursor()
 
-        if not user.hasRole(db, "administrator"):
+        if (not user.hasRole(db, "administrator")
+                and not user.getPreference(db, 'review.updateAnyBranch')):
             cursor.execute("""SELECT 1
                                 FROM trackedbranchusers
                                WHERE branch=%s
@@ -115,7 +116,8 @@ class TriggerTrackedBranchUpdate(Operation):
     def process(self, db, user, branch_id):
         cursor = db.cursor()
 
-        if not user.hasRole(db, "administrator"):
+        if (not user.hasRole(db, "administrator")
+                and not user.getPreference(db, 'review.updateAnyBranch')):
             cursor.execute("""SELECT 1
                                 FROM trackedbranchusers
                                WHERE branch=%s
@@ -153,7 +155,8 @@ class EnableTrackedBranch(Operation):
     def process(self, db, user, branch_id, new_remote_name=None):
         cursor = db.cursor()
 
-        if not user.hasRole(db, "administrator"):
+        if (not user.hasRole(db, "administrator")
+                and not user.getPreference(db, 'review.updateAnyBranch')):
             cursor.execute("""SELECT 1
                                 FROM trackedbranchusers
                                WHERE branch=%s
@@ -215,7 +218,8 @@ class DeleteTrackedBranch(Operation):
     def process(self, db, user, branch_id):
         cursor = db.cursor()
 
-        if not user.hasRole(db, "administrator"):
+        if (not user.hasRole(db, "administrator")
+                and not user.getPreference(db, 'review.updateAnyBranch')):
             cursor.execute("""SELECT 1
                                 FROM trackedbranchusers
                                WHERE branch=%s
