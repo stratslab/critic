@@ -106,12 +106,13 @@ class NoSuchReview(base.Error):
         self.id = review_id
 
 class ReviewState(object):
-    def __init__(self, review, accepted, pending, reviewed, issues):
+    def __init__(self, review, accepted, pending, reviewed, issues, last_batch=None):
         self.review = review
         self.accepted = accepted
         self.pending = pending
         self.reviewed = reviewed
         self.issues = issues
+        self.last_batch = last_batch or {}
 
     def getPercentReviewed(self):
         if self.pending + self.reviewed:
@@ -142,10 +143,16 @@ class ReviewState(object):
     def __str__(self):
         if self.review.state == 'dropped': return "Dropped..."
         elif self.review.state == 'closed': return "Finished!"
-        elif self.accepted: return "Accepted!"
+        elif self.accepted:
+            if self.last_batch.get('note') == 'Branch is being integrated':
+                return "Integration started"
+            return "Accepted!"
         else:
             progress = self.getProgress()
             issues = self.getIssues()
+            if progress == '100 %' and self.last_batch.get('issue'):
+                if self.last_batch.get('note') == 'Integration failed!':
+                    return 'Integration failed!'
             if issues: return "%s and %s" % (progress, issues)
             else: return progress
 
@@ -291,7 +298,28 @@ class Review(object):
 
         issues = cursor.fetchone()[0]
 
-        return ReviewState(self, self.accepted(db), pending, reviewed, issues)
+        cursor.execute("""SELECT c.id, c.type, cm.comment
+                            FROM batches b
+                      INNER JOIN (
+                                  SELECT MAX(id) as id
+                                    FROM batches
+                                   WHERE review = %s
+                                 ) b2 ON b.id = b2.id
+                      INNER JOIN commentchains c ON c.batch = b.id
+                      INNER JOIN comments cm ON first_comment = cm.id
+                           WHERE c.state = 'open' AND b.uid = 1
+                        ORDER BY c.id desc""",
+                       (self.id,))
+
+        last_batch = {}
+        last_batch_chain = cursor.fetchone()
+        if last_batch_chain and last_batch_chain[1] == 'note':
+            last_batch['note'] = last_batch_chain[2]
+            last_batch_chain = cursor.fetchone()
+            if last_batch_chain and last_batch_chain[1] == 'issue':
+                last_batch['issue'] = last_batch_chain[0]
+
+        return ReviewState(self, self.accepted(db), pending, reviewed, issues, last_batch)
 
     def setPerformedRebase(self, old_head, new_head, old_upstream, new_upstream, user,
                            equivalent_merge, replayed_rebase):
