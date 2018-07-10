@@ -428,7 +428,7 @@ def renderShowReview(req, db, user):
             renderPeople(target, review.reviewers)
         else:
             target.i().text("No reviewers.")
-	return
+        return
         cursor.execute("""SELECT reviewfilters.id, reviewfilters.uid, reviewfilters.path
                             FROM reviewfilters
                             JOIN users ON (reviewfilters.uid=users.id)
@@ -714,15 +714,23 @@ def renderShowReview(req, db, user):
     elif review.state == "open" and review_state.accepted:
 #        progress_h1.img(src=htmlutils.getStaticResourceURI("seal-of-approval-left.png"),
 #                        style="position: absolute; margin-left: -80px; margin-top: -100px")
-        progress_h1.text("Accepted!")
-        progress_h1.div().span("remark").text("Hurry up and close it before anyone has a change of heart.")
+        if title_data['progress'] == 'Accepted!':
+            progress_h1.text("Accepted!")
+            progress_h1.div().span("remark").text("Hurry up and deploy it in IDE before anyone has a change of heart.")
+        else:
+            progress_h1.text(title_data['progress'])
+            progress_h1.div().span("remark").text("Stand by for the commit queue to finish the job.")
     else:
-        progress_h1.text(review_state.getProgress())
+        if review_state.last_batch.get('issue') and 'Integration' in title_data['progress']:
+            progress_h1.text(title_data['progress'])
+            progress.tr().td('stuck', colspan=3).a(href="showcomment?chain=%d" % review_state.last_batch['issue']).text("See the issue for details")
+        else:
+            progress_h1.text(review_state.getProgress())
 
-        if review_state.issues:
-            progress_h1.span("comments").text(" and ")
-            progress_h1.text("%d" % review_state.issues)
-            progress_h1.span("comments").text(" issue%s" % (review_state.issues > 1 and "s" or ""))
+            if review_state.issues:
+                progress_h1.span("comments").text(" and ")
+                progress_h1.text("%d" % review_state.issues)
+                progress_h1.span("comments").text(" issue%s" % (review_state.issues > 1 and "s" or ""))
 
         if review_state.getPercentReviewed() != 100.0:
             cursor = db.cursor()
