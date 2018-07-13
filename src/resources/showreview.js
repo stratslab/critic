@@ -163,6 +163,16 @@ function disableTracking(branch_id)
     location.reload();
 }
 
+function refreshFilters()
+{
+  var operation = new Operation({ action: "refresh filters",
+                                  url: "reapplyreviewfilters",
+                                  data: { review_id: review.id }});
+
+  if (operation.execute())
+    location.reload();
+}
+
 function watchReview()
 {
   var operation = new Operation({ "action": "watch review",
