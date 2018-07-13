@@ -428,6 +428,10 @@ def renderShowReview(req, db, user):
             renderPeople(target, review.reviewers)
         else:
             target.i().text("No reviewers.")
+
+        buttons = target.div("buttons")
+        if user in review.owners:
+            buttons.button("refreshfilters", onclick="refreshFilters();").text("Refresh Reviewers")
         return
         cursor.execute("""SELECT reviewfilters.id, reviewfilters.uid, reviewfilters.path
                             FROM reviewfilters
@@ -491,7 +495,6 @@ def renderShowReview(req, db, user):
                 tfoot.setAttribute("class", "hidden")
                 reviewer_filters_hidden.append(False)
 
-        buttons = target.div("buttons")
 
         if reviewer_filters_hidden:
             buttons.button("showfilters", onclick="toggleReviewFilters('reviewers', $(this));").text("%s Custom Filters" % ("Show" if reviewer_filters_hidden[0] else "Hide"))

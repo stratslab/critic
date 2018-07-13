@@ -145,7 +145,7 @@ class ReapplyReviewFilters(Operation):
 
         review = dbutils.review.Review.fromId(db, review_id)
 
-        if not user.hasRole(db, "administrator") and not user in review.owners:
+        if not user.hasRole(db, "administrator") and user.id not in (owner.id for owner in review.owners):
             raise OperationFailure(
                 code="notallowed",
                 title="Not allowed!",
