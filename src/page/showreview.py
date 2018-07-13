@@ -430,7 +430,8 @@ def renderShowReview(req, db, user):
             target.i().text("No reviewers.")
 
         buttons = target.div("buttons")
-        buttons.button("refreshfilters", onclick="refreshFilters();").text("Refresh Reviewers")
+        if user in review.owners:
+            buttons.button("refreshfilters", onclick="refreshFilters();").text("Refresh Reviewers")
         return
         cursor.execute("""SELECT reviewfilters.id, reviewfilters.uid, reviewfilters.path
                             FROM reviewfilters
